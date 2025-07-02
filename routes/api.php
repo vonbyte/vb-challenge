@@ -23,6 +23,17 @@ Route::name('api.pilot.')
     ->prefix('pilot')
     ->group(function () {
         Route::get('/{pilot}', 'show')->name('show');
+        Route::get('/{pilot}/training', 'showByPilot')->name('pilot.show');
+        Route::get('/', 'index')->name('index');
+    })
+    //->middleware('auth:sanctum') ToDo: Add proper api authentication handled by sanctum
+;
+
+Route::name('api.training.')
+    ->controller(\App\Http\Controllers\TrainingController::class)
+    ->prefix('training')
+    ->group(function () {
+        Route::get('/{training}', 'show')->name('show');
         Route::get('/', 'index')->name('index');
     })
     //->middleware('auth:sanctum') ToDo: Add proper api authentication handled by sanctum
