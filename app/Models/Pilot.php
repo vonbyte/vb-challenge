@@ -20,4 +20,11 @@ class Pilot extends Model
     {
         return $this->belongsToMany(Training::class);
     }
+
+    public function renewableTrainings(): BelongsToMany
+    {
+        return $this->belongsToMany(Training::class)
+            ->where('expiresNever',false)
+            ->withPivot('date');
+    }
 }

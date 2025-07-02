@@ -2,8 +2,6 @@
 
 use App\Models\Company;
 use App\Models\Pilot;
-use App\Models\Role;
-use App\Models\User;
 
 it('has the expected attributes', function () {
     $fields = ['name'];
