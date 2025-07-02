@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePilotRequest;
-use App\Http\Requests\UpdatePilotRequest;
-use App\Models\Company;
 use App\Models\Pilot;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 class PilotController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of pilots.
      */
     public function index()
     {
@@ -31,20 +30,13 @@ class PilotController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePilotRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * Display the specified pilot.
      */
     public function show(Pilot $pilot)
     {
-        $pilot->load('trainings');
         try {
+            $pilot->load('trainings');
+
             return [
                 'data' => $pilot,
                 'success' => true,
@@ -60,12 +52,13 @@ class PilotController extends Controller
     }
 
     /**
-     * Display the specified resource by pilot.
+     * Display trainings by the specified pilot.
      */
     public function showTrainings(Pilot $pilot)
     {
-        $pilot->load('trainings');
         try {
+            $pilot->load('trainings');
+
             return [
                 'data' => $pilot->trainings,
                 'success' => true,
@@ -81,18 +74,86 @@ class PilotController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Get critical trainings for a specific pilot
      */
-    public function update(UpdatePilotRequest $request, Pilot $pilot)
+    public function showCriticalTrainings(Pilot $pilot)
     {
-        //
+        try {
+            $trainings = $this->getCriticalTrainings($pilot);
+
+            return [
+                'data' => $trainings,
+                'success' => true,
+                'error' => null,
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'data' => [],
+                'success' => false,
+                'error' => $th->getMessage(),
+            ];
+        }
+
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Get Expired trainings for a specific user
      */
-    public function destroy(Pilot $pilot)
+    public function showExpiredTrainings(Pilot $pilot)
     {
-        //
+
+        try {
+            $trainings = $this->getExpiredTrainings($pilot);
+
+            return [
+                'data' => $trainings,
+                'success' => true,
+                'error' => null,
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'data' => [],
+                'success' => false,
+                'error' => $th->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * @param Pilot $pilot
+     * @return Collection
+     */
+    protected function getCriticalTrainings(Pilot $pilot): Collection
+    {
+        // ToDo: we want to put this on the model basis later to avoid crowded controllers
+        $trainings = $pilot->renewableTrainings;
+        $trainings->filter(function ($training) {
+            $expiryDate = Carbon::parse($training->pivot->date)->addMonths($training->expirationPeriod);
+            $renevalDate = Carbon::parse($training->pivot->date)->addMonths($training->expirationPeriod)->subMonths($training->renevalPeriod);
+            // ToDo we have to set the says on the model as mutators, so that we can deliver the effective days via API
+            //$expiryDays = $today->diffInDays($expiryDate, false);
+            //$renevalDays = $expiryDate->diffInDays($renevalDate, false);
+
+            return Carbon::today()->between($renevalDate, $expiryDate);
+        });
+        return $trainings;
+    }
+
+    /**
+     * @param Pilot $pilot
+     * @return Collection
+     */
+    protected function getExpiredTrainings(Pilot $pilot): Collection
+    {
+        // ToDo: we want to put this on the model basis later to avoid crowded controllers
+        $trainings = $pilot->renewableTrainings;
+        $trainings->filter(function ($training) {
+            $expiryDate = Carbon::parse($training->pivot->date)->addMonths($training->expirationPeriod);
+            $today = Carbon::today();
+            // ToDo we have to set the says on the model as mutators, so that we can deliver the effective days via API
+            //$expiryDays = $today->diffInDays($expiryDate, false);
+            return $expiryDate->diffInDays($today) <= 0;
+        });
+        return $trainings;
     }
 }

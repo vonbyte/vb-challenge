@@ -24,6 +24,8 @@ Route::name('api.pilot.')
     ->group(function () {
         Route::get('/{pilot}', 'show')->name('show');
         Route::get('/{pilot}/training', 'showTrainings')->name('training.show');
+        Route::get('/{pilot}/training/critical', 'showCriticalTrainings')->name('training.critical');
+        Route::get('/{pilot}/training/expired', 'showExpiredTrainings')->name('training.expired');
         Route::get('/', 'index')->name('index');
     })
     //->middleware('auth:sanctum') ToDo: Add proper api authentication handled by sanctum

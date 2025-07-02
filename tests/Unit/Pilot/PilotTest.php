@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pilot;
 use App\Models\Training;
 
 it('has the expected attributes', function () {
@@ -36,4 +37,27 @@ it('belongs to zero or many trainings', function () {
 
     expect($pilot->trainings->count())->toBe(3);
     expect($pilot->trainings->first())->toBeInstanceOf(Training::class);
+});
+
+it('retrieves renevable trainings', function () {
+    $pilot = \App\Models\Pilot::factory()
+        ->hasAttached(
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => true];
+                })
+                ->count(1),
+            ['date' => \Illuminate\Support\Carbon::now()->subDays(5)]
+        )
+        ->hasAttached(
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => false];
+                })
+                ->count(3),
+            ['date' => \Illuminate\Support\Carbon::now()->subDays(5)]
+        )
+        ->create();
+
+    expect($pilot->renewableTrainings->count())->toBe(3);
 });

@@ -76,31 +76,56 @@ it('retreives a all trainings from a single pilot', function () {
 it('retreives a all critical trainings from a single pilot', function () {
     $trainingModel = \App\Models\Pilot::factory()
         ->hasAttached(
-            Training::factory()->count(3),
-            ['date' => \Illuminate\Support\Carbon::now()->subDays(5)]
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => false, 'expirationPeriod' => 6, 'renevalPeriod' => 1];
+                })
+                ->count(3),
+            ['date' => \Illuminate\Support\Carbon::now()->subMonths(2)]
+        )
+        ->hasAttached(
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => true, 'expirationPeriod' => 0, 'renevalPeriod' => 0];
+                })
+                ->count(1),
+            ['date' => \Illuminate\Support\Carbon::now()->subMonths(2)]
         )
         ->create();
-    $url = route('api.training.show', $trainingModel->id);
+    $url = route('api.pilot.training.critical', $trainingModel->id);
 
     $response = $this->get($url);
 
-    $training = $response->json()['data'];
+    $trainings = $response->json()['data'];
 
-    expect($training['trainings'])->toHaveCount(3);
+    expect($trainings)->toHaveCount(3);
 });
 
 it('retreives a all expired trainings from a single pilot', function () {
     $trainingModel = \App\Models\Pilot::factory()
         ->hasAttached(
-            Training::factory()->count(3),
-            ['date' => \Illuminate\Support\Carbon::now()->subDays(5)]
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => false, 'expirationPeriod' => 4, 'renevalPeriod' => 1];
+                })
+                ->count(3),
+            ['date' => \Illuminate\Support\Carbon::now()->subMonths(6)]
+        )
+        ->hasAttached(
+            Training::factory()
+                ->state(function (array $attributes) {
+                    return ['expiresNever' => true, 'expirationPeriod' => 0, 'renevalPeriod' => 0];
+                })
+                ->count(1),
+            ['date' => \Illuminate\Support\Carbon::now()->subMonths(2)]
         )
         ->create();
-    $url = route('api.training.show', $trainingModel->id);
+
+    $url = route('api.pilot.training.expired', $trainingModel->id);
 
     $response = $this->get($url);
 
-    $training = $response->json()['data'];
+    $trainings = $response->json()['data'];
 
-    expect($training['trainings'])->toHaveCount(3);
+    expect($trainings)->toHaveCount(3);
 });

@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreTrainingRequest;
-use App\Http\Requests\UpdateTrainingRequest;
-use App\Models\Pilot;
 use App\Models\Training;
 
 class TrainingController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of trainings.
      */
     public function index()
     {
@@ -31,20 +28,12 @@ class TrainingController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTrainingRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * Display the specified training.
      */
     public function show(Training $training)
     {
-        $training->load('pilots');
         try {
+            $training->load('pilots');
             return [
                 'data' => $training,
                 'success' => true,
@@ -59,19 +48,4 @@ class TrainingController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTrainingRequest $request, Training $training)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Training $training)
-    {
-        //
-    }
 }

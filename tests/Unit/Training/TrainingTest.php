@@ -27,3 +27,19 @@ it('belongs to zero or many pilots', function () {
     expect($training->pilots->count())->toBe(3);
     expect($training->pilots->first())->toBeInstanceOf(Pilot::class);
 });
+
+it('has the correct status if is permanent', function () {
+    $training = Training::factory()->create([
+        'expiresNever' => true,
+    ]);
+
+    expect($training->getStatus(true))->toBe('permanent');
+});
+
+
+//    $this->assertEquals(TrainingStatus::VALID_PERMANENT, $training->getStatus());
+//    $this->assertNull($training->calculateExpiryDate());
+//    $this->assertFalse($training->canBeRenewed());
+//    $this->assertNull($training->getDaysUntilExpiry());
+
+
