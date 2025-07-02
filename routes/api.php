@@ -18,3 +18,13 @@ Route::name('api.company.')
     //->middleware('auth:sanctum') ToDo: Add proper api authentication handled by sanctum
 ;
 
+Route::name('api.pilot.')
+    ->controller(\App\Http\Controllers\PilotController::class)
+    ->prefix('pilot')
+    ->group(function () {
+        Route::get('/{pilot}', 'show')->name('show');
+        Route::get('/', 'index')->name('index');
+    })
+    //->middleware('auth:sanctum') ToDo: Add proper api authentication handled by sanctum
+;
+
