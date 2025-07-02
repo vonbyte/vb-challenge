@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Pilot;
+use App\Models\Training;
 
 it('has a training index route', function () {
     $url = route('api.training.index');
@@ -46,19 +47,30 @@ it('retreives a single training with pilots', function () {
 });
 
 it('retreives a all trainings from a single pilot', function () {
-    $trainingModel = \App\Models\Pilot::factory()
+    $pilot1Model = \App\Models\Pilot::factory()
         ->hasAttached(
-            Training::factory()->count(3),
+            Training::factory()->count(4),
             ['date' => \Illuminate\Support\Carbon::now()->subDays(5)]
         )
         ->create();
-    $url = route('api.pilot.training.show', $trainingModel->id);
+    $pilot2Model = \App\Models\Pilot::factory()
+        ->hasAttached(
+            Training::factory()->count(2),
+            ['date' => \Illuminate\Support\Carbon::now()->subDays(2)]
+        )
+        ->create();
 
+    $url = route('api.pilot.training.show', $pilot1Model->id);
     $response = $this->get($url);
+    $trainings = $response->json()['data'];
+    expect($trainings)->toHaveCount(4);
 
-    $training = $response->json()['data'];
+    $url = route('api.pilot.training.show', $pilot2Model->id);
+    $response = $this->get($url);
+    $trainings = $response->json()['data'];
+    expect($trainings)->toHaveCount(2);
 
-    expect($training['trainings'])->toHaveCount(3);
+
 });
 
 it('retreives a all critical trainings from a single pilot', function () {

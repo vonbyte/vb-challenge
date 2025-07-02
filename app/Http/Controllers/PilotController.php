@@ -60,6 +60,27 @@ class PilotController extends Controller
     }
 
     /**
+     * Display the specified resource by pilot.
+     */
+    public function showTrainings(Pilot $pilot)
+    {
+        $pilot->load('trainings');
+        try {
+            return [
+                'data' => $pilot->trainings,
+                'success' => true,
+                'error' => null,
+            ];
+        } catch (\Throwable $th) {
+            return [
+                'data' => [],
+                'success' => false,
+                'error' => $th->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(UpdatePilotRequest $request, Pilot $pilot)
